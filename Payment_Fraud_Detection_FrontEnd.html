@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fraud Detection Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --bg-elev: #11161e;
+    --bg-elev-2: #1a212c;
+    --border: #1f2733;
+    --border-bright: #2d3848;
+    --text: #d8dee9;
+    --text-dim: #6b7785;
+    --text-faint: #4a5563;
+    --accent: #5ac8fa;
+    --accent-dim: #2a8cb8;
+    --warn: #ffb454;
+    --danger: #ff5e5e;
+    --success: #7fd99c;
+    --grid: rgba(90, 200, 250, 0.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    background: rgba(10, 14, 20, 0.85);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .brand-mark {
+    width: 32px;
+    height: 32px;
+    border: 1.5px solid var(--accent);
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+  .brand-mark::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px solid var(--accent-dim);
+  }
+  .brand-mark::after {
+    content: '◆';
+    color: var(--accent);
+    font-size: 10px;
+  }
+
+  .brand-text h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .brand-text p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--border-bright);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(127, 217, 156, 0.6); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(127, 217, 156, 0); }
+  }
+
+  /* LAYOUT */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+  }
+
+  .panel-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-elev-2);
+  }
+
+  .panel-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+  }
+  .panel-title strong {
+    color: var(--accent);
+    margin-right: 8px;
+  }
+
+  .panel-body {
+    padding: 24px;
+  }
+
+  /* PRESETS */
+  .presets {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .preset-btn {
+    background: transparent;
+    border: 1px solid var(--border-bright);
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .preset-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .preset-btn.fraud:hover {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+  .preset-btn.blocked:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  /* FORM */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-grid .full { grid-column: 1 / -1; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-faint);
+  }
+
+  .field input {
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    padding: 10px 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    transition: border-color 0.15s;
+  }
+
+  .field input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .field input::placeholder {
+    color: var(--text-faint);
+  }
+
+  /* SUBMIT */
+  .submit-row {
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary:hover {
+    background: #7dd4ff;
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border-bright);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 11px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* RESPONSE */
+  .response-box {
+    margin-top: 24px;
+    padding: 16px;
+    border: 1px solid var(--border-bright);
+    background: var(--bg);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    min-height: 80px;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .response-box.success {
+    border-color: var(--success);
+    color: var(--success);
+  }
+  .response-box.error {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+  .response-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+    color: var(--text-faint);
+  }
+
+  /* TRANSACTIONS LIST */
+  .txn-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 640px;
+    overflow-y: auto;
+  }
+
+  .txn-list::-webkit-scrollbar { width: 6px; }
+  .txn-list::-webkit-scrollbar-track { background: var(--bg); }
+  .txn-list::-webkit-scrollbar-thumb { background: var(--border-bright); }
+
+  .txn-card {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--danger);
+    padding: 14px 16px;
+    background: var(--bg-elev-2);
+    transition: border-color 0.15s;
+  }
+
+  .txn-card:hover {
+    border-color: var(--border-bright);
+    border-left-color: var(--danger);
+  }
+
+  .txn-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+
+  .txn-id {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .txn-amount {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .txn-meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .txn-meta div span {
+    color: var(--text-faint);
+    margin-right: 6px;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+
+  .txn-reason {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--warn);
+  }
+
+  .txn-reason::before {
+    content: '⚠ ';
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-faint);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .empty-state::before {
+    content: '[ ]';
+    display: block;
+    font-size: 32px;
+    margin-bottom: 12px;
+    color: var(--border-bright);
+  }
+
+  /* CORS WARNING */
+  .cors-note {
+    max-width: 1400px;
+    margin: 0 auto 0 auto;
+    padding: 12px 32px 0;
+  }
+
+  .cors-note-inner {
+    border: 1px solid var(--warn);
+    border-left-width: 3px;
+    background: rgba(255, 180, 84, 0.05);
+    padding: 12px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--warn);
+    line-height: 1.6;
+  }
+
+  .cors-note-inner strong {
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 10px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    margin-top: 48px;
+    padding: 20px 32px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  /* CONFIG SECTION */
+  .config-bar {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 16px 32px 0;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .config-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .config-item label {
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 10px;
+  }
+
+  .config-item input {
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    color: var(--accent);
+    padding: 4px 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    width: 200px;
+  }
+  .config-item input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-text">
+        <h1><strong>Fraud Detection Console</strong></h1>
+        <p>MuleSoft API-Led · Local Dev</p>
+      </div>
+    </div>
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      <span><strong>System Online</strong></span>
+    </div>
+  </div>
+</header>
+<div class="config-bar">
+  <div class="config-item">
+    <label><strong>EXP API</strong></label>
+    <input type="text" id="expApiUrl" value="http://localhost:8089/api/payments">
+  </div>
+  <div class="config-item">
+    <label><strong>SYS API</strong></label>
+    <input type="text" id="sysApiUrl" value="http://localhost:8085/api/payments">
+  </div>
+</div>
+
+<main>
+
+  <!-- LEFT: SUBMIT FORM -->
+  <section class="panel">
+    <div class="panel-header">
+      <div class="panel-title"><strong>Submit Payment</strong></div>
+    </div>
+    <div class="panel-body">
+
+      <div class="presets">
+        <button class="preset-btn" onclick="loadPreset('clean')">Clean Transaction</button>
+        <button class="preset-btn fraud" onclick="loadPreset('high-amount')">High Amount</button>
+        <button class="preset-btn fraud" onclick="loadPreset('country-mismatch')">Country Mismatch</button>
+        <button class="preset-btn blocked" onclick="loadPreset('blacklist')">Blacklisted Card</button>
+      </div>
+
+      <form id="paymentForm" onsubmit="submitPayment(event)">
+        <div class="form-grid">
+          <div class="field full">
+            <label>Transaction ID</label>
+            <input type="text" id="transactionId" required placeholder="TXN_001">
+          </div>
+          <div class="field full">
+            <label>Card Number</label>
+            <input type="text" id="cardNumber" required placeholder="4567891234567890">
+          </div>
+          <div class="field full">
+            <label>Card Holder</label>
+            <input type="text" id="cardHolder" required placeholder="Customer Name">
+          </div>
+          <div class="field">
+            <label>Amount</label>
+            <input type="number" step="0.01" id="amount" required placeholder="2500">
+          </div>
+          <div class="field">
+            <label>Currency</label>
+            <input type="text" id="currency" required value="INR" maxlength="3">
+          </div>
+          <div class="field">
+            <label>Country</label>
+            <input type="text" id="country" required value="IN" maxlength="2">
+          </div>
+          <div class="field">
+            <label>Card Country</label>
+            <input type="text" id="cardCountry" required value="IN" maxlength="2">
+          </div>
+          <div class="field">
+            <label>Merchant ID</label>
+            <input type="text" id="merchantId" required placeholder="MERCH001">
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="email" required placeholder="customer@example.com">
+          </div>
+        </div>
+
+        <div class="submit-row">
+          <button type="submit" class="btn-primary" id="submitBtn">Submit Payment</button>
+          <button type="button" class="btn-secondary" onclick="clearForm()">Reset</button>
+        </div>
+      </form>
+
+      <div class="response-label" id="responseLabel" style="display:none;">API Response</div>
+      <div class="response-box" id="responseBox" style="display:none;"></div>
+
+    </div>
+  </section>
+
+  <!-- RIGHT: BLOCKED TRANSACTIONS -->
+  <section class="panel">
+    <div class="panel-header">
+      <div class="panel-title"><strong>Blocked Transactions</strong></div>
+      <button class="btn-secondary" onclick="loadBlocked()" id="refreshBtn"><strong>Refresh</strong></button>
+    </div>
+    <div class="panel-body">
+      <div id="txnContainer">
+        <div class="empty-state">
+          Click "Refresh" to load blocked transactions from the System API
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Fraud Detection · Local Dev Environment · Built on MuleSoft
+</footer>
+
+<script>
+  const PRESETS = {
+    'clean': {
+      transactionId: 'CLEAN_' + Date.now(),
+      cardNumber: '4567891234567890',
+      cardHolder: 'Rahul Sharma',
+      amount: 2500,
+      currency: 'INR',
+      country: 'IN',
+      cardCountry: 'IN',
+      merchantId: 'MERCH001',
+      email: 'customer@example.com'
+    },
+    'high-amount': {
+      transactionId: 'HIGH_' + Date.now(),
+      cardNumber: '4567891234567890',
+      cardHolder: 'Priya Mehta',
+      amount: 75000,
+      currency: 'INR',
+      country: 'IN',
+      cardCountry: 'IN',
+      merchantId: 'MERCH002',
+      email: 'customer@example.com'
+    },
+    'country-mismatch': {
+      transactionId: 'MISMATCH_' + Date.now(),
+      cardNumber: '4567891234567890',
+      cardHolder: 'Arjun Kumar',
+      amount: 3000,
+      currency: 'INR',
+      country: 'IN',
+      cardCountry: 'US',
+      merchantId: 'MERCH003',
+      email: 'customer@example.com'
+    },
+    'blacklist': {
+      transactionId: 'BLACK_' + Date.now(),
+      cardNumber: '4111111111111111',
+      cardHolder: 'Suspicious User',
+      amount: 100,
+      currency: 'INR',
+      country: 'IN',
+      cardCountry: 'IN',
+      merchantId: 'MERCH004',
+      email: 'customer@example.com'
+    }
+  };
+
+  function loadPreset(key) {
+    const p = PRESETS[key];
+    for (const [field, value] of Object.entries(p)) {
+      const el = document.getElementById(field);
+      if (el) el.value = value;
+    }
+  }
+
+  function clearForm() {
+    document.getElementById('paymentForm').reset();
+    document.getElementById('currency').value = 'INR';
+    document.getElementById('country').value = 'IN';
+    document.getElementById('cardCountry').value = 'IN';
+    document.getElementById('responseBox').style.display = 'none';
+    document.getElementById('responseLabel').style.display = 'none';
+  }
+
+  async function submitPayment(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const box = document.getElementById('responseBox');
+    const label = document.getElementById('responseLabel');
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    const payload = {
+      transactionId: document.getElementById('transactionId').value,
+      cardNumber: document.getElementById('cardNumber').value,
+      cardHolder: document.getElementById('cardHolder').value,
+      amount: parseFloat(document.getElementById('amount').value),
+      currency: document.getElementById('currency').value,
+      country: document.getElementById('country').value,
+      cardCountry: document.getElementById('cardCountry').value,
+      merchantId: document.getElementById('merchantId').value,
+      email: document.getElementById('email').value
+    };
+
+    label.style.display = 'block';
+    box.style.display = 'block';
+    box.className = 'response-box';
+
+    try {
+      const url = document.getElementById('expApiUrl').value;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const text = await res.text();
+      let parsed;
+      try { parsed = JSON.parse(text); } catch { parsed = text; }
+
+      box.classList.add(res.ok ? 'success' : 'error');
+      box.textContent = `HTTP ${res.status} ${res.statusText}\n\n${JSON.stringify(parsed, null, 2)}`;
+    } catch (err) {
+      box.classList.add('error');
+      box.textContent = `NETWORK ERROR\n\n${err.message}\n\nIs the Experience API running on the configured URL?\nCheck CORS settings if you see a CORS error.`;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit Payment';
+    }
+  }
+
+  async function loadBlocked() {
+    const btn = document.getElementById('refreshBtn');
+    const container = document.getElementById('txnContainer');
+
+    btn.disabled = true;
+    btn.textContent = 'Loading...';
+    container.innerHTML = '<div class="empty-state">Fetching transactions...</div>';
+
+    try {
+      const url = document.getElementById('sysApiUrl').value;
+      const res = await fetch(url);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const data = await res.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        container.innerHTML = '<div class="empty-state">No blocked transactions found</div>';
+        return;
+      }
+
+      container.innerHTML = '<div class="txn-list">' +
+        data.map(t => renderTransaction(t)).join('') +
+        '</div>';
+
+    } catch (err) {
+      container.innerHTML = `<div class="empty-state" style="color:var(--danger);">
+        Failed to load: ${err.message}<br>
+        <small style="display:block;margin-top:8px;color:var(--text-faint);">
+          Check that System API is running and CORS is configured
+        </small>
+      </div>`;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Refresh';
+    }
+  }
+
+  function renderTransaction(t) {
+    const id = t.transactionId || t.transaction_id || '—';
+    const holder = t.cardHolder || t.card_holder || '—';
+    const amount = t.amount || 0;
+    const currency = t.currency || '';
+    const country = t.country || '—';
+    const cardCountry = t.cardCountry || t.card_country || '—';
+    const merchant = t.merchantId || t.merchant_id || '—';
+    const reason = t.reason || 'No reason recorded';
+    const created = t.createdAt || t.created_at || '';
+    const dateStr = created ? new Date(created).toLocaleString() : '—';
+
+    return `
+      <div class="txn-card">
+        <div class="txn-header">
+          <div>
+            <div class="txn-id">${escapeHtml(id)}</div>
+            <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${escapeHtml(holder)}</div>
+          </div>
+          <div class="txn-amount">${currency} ${formatAmount(amount)}</div>
+        </div>
+        <div class="txn-meta">
+          <div><span>From</span>${escapeHtml(country)}</div>
+          <div><span>Card</span>${escapeHtml(cardCountry)}</div>
+          <div><span>Merchant</span>${escapeHtml(merchant)}</div>
+          <div><span>Time</span>${escapeHtml(dateStr)}</div>
+        </div>
+        <div class="txn-reason">${escapeHtml(reason)}</div>
+      </div>
+    `;
+  }
+  function formatAmount(n) {
+    return new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(n);
+  }
+  function escapeHtml(s) {
+    if (s === null || s === undefined) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+  // Pre-fill with clean preset on load
+  loadPreset('clean');
+</script>
+</body>
+</html>
