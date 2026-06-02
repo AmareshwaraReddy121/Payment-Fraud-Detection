@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="EMAIL_ERRORS"
+		doc:id="e795c0ca-dc9b-4bb3-bc76-dbbfe867fb9d">
+	<!-- 1. EMAIL:CONNECTIVITY -->
+		<on-error-propagate type="EMAIL:CONNECTIVITY"
+			doc:name="Email Connectivity" enableNotifications="true"
+			logException="true">
+			<ee:transform doc:name="Transform Message">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 503,
+        errorType: "emailConnectivityError",
+        errorDescription: "Unable to connect to the email server. Please try again later."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+
+		<!-- 2. EMAIL:RETRY_EXHAUSTED -->
+
+		<!-- 3. EMAIL:SEND -->
+		<on-error-propagate type="EMAIL:SEND"
+			doc:name="Email Send" enableNotifications="true" logException="true">
+			<ee:transform doc:name="Transform Message">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 502,
+        errorType: "emailSendError",
+        errorDescription: "The email could not be sent. Please check the recipient address and try again."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+
+		<!-- 4. Catch-all EMAIL:* -->
+		<on-error-propagate type="EMAIL:*"
+			doc:name="Email Catch-all" enableNotifications="true"
+			logException="true">
+			<ee:transform doc:name="Transform Message">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 500,
+        errorType: "emailError",
+        errorDescription: "An unexpected email error occurred."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+	<error-handler name="DB_HANDLING"
+		doc:id="c2278f46-9e14-4f7e-a538-311d4f089833">
+		<on-error-propagate enableNotifications="true"
+			logException="true" type="DB:CONNECTIVITY"
+			doc:name="On Error Propagate"
+			doc:id="31206a9d-205e-4e19-ae04-559ba7efcbb7">
+			<ee:transform doc:name="Transform Message">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 503,
+        errorType: "connectivityError",
+        errorDescription: "Unable to connect to the database. Please try again later."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+
+		<!-- 2. DB:DUPLICATE_KEY -->
+
+		<!-- 3. DB:BAD_SQL_SYNTAX -->
+		<on-error-propagate enableNotifications="true"
+			logException="true" type="DB:BAD_SQL_SYNTAX"
+			doc:name="On Error Propagate"
+			doc:id="b3993c2f-aaa6-4453-b366-26e5e1aa4921">
+			<ee:transform doc:name="Transform Message">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 400,
+        errorType: "badRequest",
+        errorDescription: "You sent a bad SQL request to the database."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+
+		<!-- 4. DB:QUERY_EXECUTION -->
+		<on-error-propagate enableNotifications="true"
+			logException="true" type="DB:QUERY_EXECUTION"
+			doc:name="On Error Propagate"
+			doc:id="df48bf7c-1f96-42f7-86a2-11e67d0b5e91">
+			<ee:transform doc:name="Transform Message">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 400,
+        errorType: "queryExecutionError",
+        errorDescription: "The database could not execute the query with the supplied data."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+
+		<!-- 5. DB:RETRY_EXHAUSTED -->
+
+		<!-- 6. DB:* (catch-all) -->
+		<on-error-propagate enableNotifications="true"
+			logException="true" type="DB:*" doc:name="On Error Propagate"
+			doc:id="0eed9068-df54-4189-b8e4-ade477d0bf5b">
+			<ee:transform doc:name="Transform Message">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 500,
+        errorType: "internalError",
+        errorDescription: "An unexpected database error occurred."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+
+</mule>

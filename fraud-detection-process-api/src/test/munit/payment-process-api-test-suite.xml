@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="payment-process-api-test-suite.xml" />
+	<munit:test name="payment-process-api-mainTest::APIKIT:BAD_REQUEST" doc:id="164f1d76-df40-4342-ac61-8785c0df2e25" description="Test" expectedErrorType="APIKIT:BAD_REQUEST">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="5a0ad7fe-6409-4e54-9b54-8fd818bd5d40" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to payment-process-api-main" doc:id="99bd9625-0c26-4c41-980a-0ecc269abba4" name="payment-process-api-main"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-process-api-mainTest::APIKIT:NOT_FOUND" doc:id="dd402aea-1f1a-4d47-9dbc-0bb4e165bdef" description="Test" expectedErrorType="APIKIT:NOT_FOUND">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="91ce0abf-1ca4-4b75-b080-7b997241c3b4" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to payment-process-api-main" doc:id="1cecf711-8d0a-42fa-af9c-fafd2158b950" name="payment-process-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-process-api-mainTest::APIKIT:METHOD_NOT_ALLOWED" doc:id="6a5e7174-3a0b-433c-a50b-19438569745f" description="Test" expectedErrorType="APIKIT:METHOD_NOT_ALLOWED">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="de302aa8-9a3b-49e3-a390-5757c304e56f" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:METHOD_NOT_ALLOWED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to payment-process-api-main" doc:id="8018782a-4f46-44ca-b5d4-56194e94b2c8" name="payment-process-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-process-api-mainTest::APIKIT:NOT_ACCEPTABLE" doc:id="fb69fcb8-b837-455c-81db-9844750c0aee" description="Test" expectedErrorType="APIKIT:NOT_ACCEPTABLE">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="350861d1-c184-48d4-b8cf-48d130de0760" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_ACCEPTABLE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to payment-process-api-main" doc:id="4393c45c-256e-475f-81b3-d5f32502468c" name="payment-process-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-process-api-mainTest::APIKIT:UNSUPPORTED_MEDIA_TYPE" doc:id="da18e999-6e3c-4a04-addf-6d1da8f94ba6" description="Test" expectedErrorType="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="d29a1550-e125-4b45-9f64-68e574ac7718" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:UNSUPPORTED_MEDIA_TYPE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to payment-process-api-main" doc:id="e4416096-e31c-4008-bca5-2578f46675b5" name="payment-process-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-process-api-mainTest::APIKIT:NOT_IMPLEMENTED" doc:id="187dcf09-2960-4973-b3d2-6eeafd81d9ee" description="Test" expectedErrorType="APIKIT:NOT_IMPLEMENTED">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="62d25418-19b1-46bc-bcd9-90ffef21c299" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_IMPLEMENTED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to payment-process-api-main" doc:id="2745e86e-fc97-4ad9-8eeb-9ae808ef8b25" name="payment-process-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-process-api-consoleTest-APIKIT:NOT_FOUND" doc:id="4c2ec225-aebd-4916-a193-6c00004df105" description="Test" expectedErrorType="APIKIT:NOT_FOUND">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="8d5097ff-5575-4003-9f2c-00e8352c2e83" processor="apikit:console">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-process-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to payment-process-api-console" doc:id="8d8fd6be-3704-436e-8d56-9066e9f7d302" name="payment-process-api-console"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-process-apiFlow2-OnNewMessage" doc:id="c005d9b4-a17f-40af-b2d3-f59c31502543" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="4db7417b-3ff5-448f-acdc-e36937519326" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Request Saving Transaction" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="79fdc397-236b-4110-b521-57b91d77fa5f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value='#[output application/json&#10;---&#10;{&#10;    status: "SUCCESS",&#10;    message: "Payment record created successfully",&#10;&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="f0b2e8cc-4738-4490-b986-4cde9e8ab6f0">
+				<munit:payload value='#[output application/json ---&#10;    {&#10;        "transactionId": "TXN-OLD-001",&#10;        "cardHolder":    "Old Customer",&#10;        "amount":        100.00,&#10;        "currency":      "INR",&#10;        "country":       "IN",&#10;        "cardCountry":   "IN",&#10;        "merchantId":    "MERCH-OLD",&#10;        "email":         "old@example.com",&#10;        "status":        "BLOCKED",&#10;        "reason":        "Old record",&#10;        "createdAt":     "2020-01-01T00:00:00"&#10;    }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-process-apiFlow2" doc:id="32813bb8-5638-4486-90f8-f579e5099b64" name="payment-process-apiFlow2" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Verify call" doc:id="fa01fdeb-7b7c-4c6a-bdbc-b5f6081c1d13" processor="http:request" times="1">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Request Saving Transaction" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="79fdc397-236b-4110-b521-57b91d77fa5f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="417520b3-454b-43c1-b2ed-82aeb55709a6" expression="#[payload.status]" is='#[MunitTools::equalTo("SUCCESS")]' />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post:\process-payment:application\json:payment-process-api-configTest:JmsPublish" doc:id="7b8671b9-d2d4-453a-be6a-92fc19535028" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="9cb2af2f-f279-4b1c-a68d-66074d139074" processor="jms:publish">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Publish to JMS queue" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="45d1c2f8-0c98-41b7-b252-ef1557617cac" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="89fbdb88-0f3a-4a5e-a3b2-4ad9f0987821">
+				<munit:payload value='#[output application/json ---&#10;    {&#10;        "transactionId": "TXN-OLD-001",&#10;        "cardHolder":    "Old Customer",&#10;        "amount":        100.00,&#10;        "currency":      "INR",&#10;        "country":       "IN",&#10;        "cardCountry":   "IN",&#10;        "merchantId":    "MERCH-OLD",&#10;        "email":         "old@example.com",&#10;        "isRisk":      false&#10;    }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\process-payment:application\json:payment-process-api-config" doc:id="5d4f273c-ed16-4697-887f-38eedbf11c65" name="post:\process-payment:application\json:payment-process-api-config" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="a3ea2ab8-b444-4f6b-b6b2-9bbce03b7071" is='#[MunitTools::equalTo("ACCEPTED")]' expression="#[payload.status]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post:\process-payment:application\json::JmsPublish1:JMS:CONNECTIVITY" doc:id="4f1b39bd-2f78-4079-9fc0-169dc5263f30" description="Test" expectedErrorType="JMS:CONNECTIVITY">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="17901cd1-2872-4a4c-96bb-48a850a78ee0" processor="jms:publish">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Publish to JMS queue" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="45d1c2f8-0c98-41b7-b252-ef1557617cac" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="JMS:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="baa2411f-72b4-4a2e-8ec0-32132a0a6130">
+				<munit:payload value='#[output application/json ---&#10;    {&#10;        "transactionId": "TXN-OLD-001",&#10;        "cardHolder":    "Old Customer",&#10;        "amount":        100.00,&#10;        "currency":      "INR",&#10;        "country":       "IN",&#10;        "cardCountry":   "IN",&#10;        "merchantId":    "MERCH-OLD",&#10;        "email":         "old@example.com",&#10;        "isRisk":      false&#10;    }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\process-payment:application\json:payment-process-api-config" doc:id="3dca5e25-c6bf-411a-b0da-1e5172c3a422" name="post:\process-payment:application\json:payment-process-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="post:\process-payment:application\json::JmsPublish1:MULE:EXPRESSION" doc:id="4566be19-a824-461d-96f6-0c990658bd7f" description="Test" expectedErrorType="MULE:EXPRESSION">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="e35d69f8-4853-4484-9c35-3c156215f7ab" processor="jms:publish">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Publish to JMS queue" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="45d1c2f8-0c98-41b7-b252-ef1557617cac" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="MULE:EXPRESSION" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="0cbcb176-a0cc-45b5-87a3-241598889593">
+				<munit:payload value='#[output application/json ---&#10;    {&#10;        "transactionId": "TXN-OLD-001",&#10;        "cardHolder":    "Old Customer",&#10;        "amount":        100.00,&#10;        "currency":      "INR",&#10;        "country":       "IN",&#10;        "cardCountry":   "IN",&#10;        "merchantId":    "MERCH-OLD",&#10;        "email":         "old@example.com",&#10;        "isRisk":      false&#10;    }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\process-payment:application\json:payment-process-api-config" doc:id="c19bc181-9bd6-4817-8f5f-fcd60bf96c02" name="post:\process-payment:application\json:payment-process-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="post:\process-payment:application\json::JmsPublish1:ANY" doc:id="e5ce2300-398e-48dc-b936-697fd8feab8d" description="Test" expectedErrorType="ANY">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="096aa925-e146-48fa-a0e7-9438e60ff2dd" processor="jms:publish">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Publish to JMS queue" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="45d1c2f8-0c98-41b7-b252-ef1557617cac" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="ab1046b0-a7d5-4c85-9259-10761f30d590">
+				<munit:payload value='#[output application/json ---&#10;    {&#10;        "transactionId": "TXN-OLD-001",&#10;        "cardHolder":    "Old Customer",&#10;        "amount":        100.00,&#10;        "currency":      "INR",&#10;        "country":       "IN",&#10;        "cardCountry":   "IN",&#10;        "merchantId":    "MERCH-OLD",&#10;        "email":         "old@example.com",&#10;        "isRisk":      false&#10;    }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\process-payment:application\json:payment-process-api-config" doc:id="b52ccb42-1bea-42fe-9438-69a75fb3cea6" name="post:\process-payment:application\json:payment-process-api-config" />
+		</munit:execution>
+	</munit:test>
+	
+	<munit:test name="payment-process-apiFlowTest-Choice-Default" doc:id="8263252d-21d6-4ddd-bb5a-86a5261629c4" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Get Risk Transaction" doc:id="0511c01d-f3ec-4879-ba9b-5a313e269a20" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Get Risk Transaction" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="0a3e1980-f904-4482-9c58-20436025d12e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[output application/json ---&#10;  [  ]]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<flow-ref doc:name="Flow-ref to payment-process-apiFlow" doc:id="d35cdf0f-fb69-409e-a6e8-99186a6441f1" name="payment-process-apiFlow" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-process-apiFlowTest-Sheduler" doc:id="1266fc9a-4167-4433-a922-3cd94a58af73" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Get Risk Transaction" doc:id="4eb0499e-3b7e-46f9-b35e-62f40c977dd1" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Get Risk Transaction" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="0a3e1980-f904-4482-9c58-20436025d12e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[output application/json ---&#10;  [&#10;      {&#10;          &quot;transactionId&quot;: &quot;TXN-20260520-000001&quot;,&#10;          &quot;cardNumber&quot;:    &quot;4532-XXXX-XXXX-7821&quot;,&#10;          &quot;cardHolder&quot;:    &quot;ArunKumar&quot;,&#10;          &quot;amount&quot;:        14999.50,&#10;          &quot;currency&quot;:      &quot;INR&quot;,&#10;          &quot;country&quot;:       &quot;IN&quot;,&#10;          &quot;cardCountry&quot;:   &quot;IN&quot;,&#10;          &quot;merchantId&quot;:    &quot;MERCH-IN-00231&quot;,&#10;          &quot;email&quot;:         &quot;arun.kumar@example.com&quot;,&#10;          &quot;status&quot;:        &quot;BLOCKED&quot;,&#10;          &quot;reason&quot;:        &quot;Amount exceeds daily limit&quot;,&#10;          &quot;createdAt&quot;:     (now() as String {format: &quot;yyyy-MM-dd'T'HH:mm:ss&quot;})&#10;      }&#10;  ]]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Write to csv" doc:id="fee035dd-4f44-40e7-a863-877107815db3" processor="file:write">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Write csv to file" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="d45ae274-a4bb-432a-853f-8672795208cc" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[null]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="86cb49b0-f736-4744-91d7-a137cdd6ca87" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Request To send Email" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="07830b43-dad1-4dd9-b93a-5a99152a01ad" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[output application/json ---&#10;  {&#10;      status:    &quot;SUCCESS&quot;,&#10;      message:   &quot;Email alert sent successfully&quot;,&#10;      timeStamp: now() as String {format: &quot;yyyy-MM-dd'T'HH:mm:ss&quot;}&#10;  }]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			
+		</munit:behavior>
+		<munit:execution>
+			<flow-ref doc:name="Flow-ref to payment-process-apiFlow" doc:id="b3de276b-64d3-4433-ac91-664f161e1f6e" name="payment-process-apiFlow" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Verify call" doc:id="bcf3d80d-590f-4254-8723-5f0a628648d3" processor="file:write" atLeast="1">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Write csv to file" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="d45ae274-a4bb-432a-853f-8672795208cc" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="payment-process-apiFlowTest-Sheduler1::HTTP:CONNECTIVITY" doc:id="97be4a62-919c-4160-b160-d8b603f36ee7" description="Test" expectedErrorType="HTTP:CONNECTIVITY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Get Risk Transaction" doc:id="f7233635-b493-4641-b634-049c266bd331" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get Risk Transaction" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="0a3e1980-f904-4482-9c58-20436025d12e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json ---&#10;  [&#10;      {&#10;          &quot;transactionId&quot;: &quot;TXN-20260520-000001&quot;,&#10;          &quot;cardNumber&quot;:    &quot;4532-XXXX-XXXX-7821&quot;,&#10;          &quot;cardHolder&quot;:    &quot;ArunKumar&quot;,&#10;          &quot;amount&quot;:        14999.50,&#10;          &quot;currency&quot;:      &quot;INR&quot;,&#10;          &quot;country&quot;:       &quot;IN&quot;,&#10;          &quot;cardCountry&quot;:   &quot;IN&quot;,&#10;          &quot;merchantId&quot;:    &quot;MERCH-IN-00231&quot;,&#10;          &quot;email&quot;:         &quot;arun.kumar@example.com&quot;,&#10;          &quot;status&quot;:        &quot;BLOCKED&quot;,&#10;          &quot;reason&quot;:        &quot;Amount exceeds daily limit&quot;,&#10;          &quot;createdAt&quot;:     (now() as String {format: &quot;yyyy-MM-dd'T'HH:mm:ss&quot;})&#10;      }&#10;  ]]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Write to csv" doc:id="0d126c14-08d2-421c-8ef6-40a9d5f673b3" processor="file:write" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Write csv to file" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="d45ae274-a4bb-432a-853f-8672795208cc" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="c1852d06-d8e5-496c-b674-30b54621dc18" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Request To send Email" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="07830b43-dad1-4dd9-b93a-5a99152a01ad" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to payment-process-apiFlow" doc:id="cf2804a1-c208-4c2c-95fd-71a26881560b" name="payment-process-apiFlow" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-process-apiFlowTest-Sheduler1::HTTP:INTERNAL_SERVER_ERROR" doc:id="52d69af3-32e3-4adc-ba9b-228d0b967290" description="Test" expectedErrorType="HTTP:INTERNAL_SERVER_ERROR" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Get Risk Transaction" doc:id="85b7e5b4-9150-4460-b7df-9b6ae739497c" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get Risk Transaction" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="0a3e1980-f904-4482-9c58-20436025d12e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json ---&#10;  [&#10;      {&#10;          &quot;transactionId&quot;: &quot;TXN-20260520-000001&quot;,&#10;          &quot;cardNumber&quot;:    &quot;4532-XXXX-XXXX-7821&quot;,&#10;          &quot;cardHolder&quot;:    &quot;ArunKumar&quot;,&#10;          &quot;amount&quot;:        14999.50,&#10;          &quot;currency&quot;:      &quot;INR&quot;,&#10;          &quot;country&quot;:       &quot;IN&quot;,&#10;          &quot;cardCountry&quot;:   &quot;IN&quot;,&#10;          &quot;merchantId&quot;:    &quot;MERCH-IN-00231&quot;,&#10;          &quot;email&quot;:         &quot;arun.kumar@example.com&quot;,&#10;          &quot;status&quot;:        &quot;BLOCKED&quot;,&#10;          &quot;reason&quot;:        &quot;Amount exceeds daily limit&quot;,&#10;          &quot;createdAt&quot;:     (now() as String {format: &quot;yyyy-MM-dd'T'HH:mm:ss&quot;})&#10;      }&#10;  ]]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Write to csv" doc:id="7618a354-fc2f-4282-a9e3-e893c4ce2e32" processor="file:write" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Write csv to file" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="d45ae274-a4bb-432a-853f-8672795208cc" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="ef429aa0-d1b6-4ac2-8d30-819e70cdc785" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Request To send Email" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="07830b43-dad1-4dd9-b93a-5a99152a01ad" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:INTERNAL_SERVER_ERROR" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to payment-process-apiFlow" doc:id="b0ff2e17-6662-4de5-a0d7-41a2674c7487" name="payment-process-apiFlow" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-process-apiFlowTest-Sheduler1::FILE:CONNECTIVITY" doc:id="dac95186-547c-4609-907b-af64ae690105" description="Test" expectedErrorType="FILE:CONNECTIVITY" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Get Risk Transaction" doc:id="b01c3fe5-8de7-4c08-8b11-e87acddaa9ce" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get Risk Transaction" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="0a3e1980-f904-4482-9c58-20436025d12e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json ---&#10;  [&#10;      {&#10;          &quot;transactionId&quot;: &quot;TXN-20260520-000001&quot;,&#10;          &quot;cardNumber&quot;:    &quot;4532-XXXX-XXXX-7821&quot;,&#10;          &quot;cardHolder&quot;:    &quot;ArunKumar&quot;,&#10;          &quot;amount&quot;:        14999.50,&#10;          &quot;currency&quot;:      &quot;INR&quot;,&#10;          &quot;country&quot;:       &quot;IN&quot;,&#10;          &quot;cardCountry&quot;:   &quot;IN&quot;,&#10;          &quot;merchantId&quot;:    &quot;MERCH-IN-00231&quot;,&#10;          &quot;email&quot;:         &quot;arun.kumar@example.com&quot;,&#10;          &quot;status&quot;:        &quot;BLOCKED&quot;,&#10;          &quot;reason&quot;:        &quot;Amount exceeds daily limit&quot;,&#10;          &quot;createdAt&quot;:     (now() as String {format: &quot;yyyy-MM-dd'T'HH:mm:ss&quot;})&#10;      }&#10;  ]]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Write to csv" doc:id="99d7aaaf-bddb-442a-808c-d7bc456fc922" processor="file:write" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Write csv to file" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="d45ae274-a4bb-432a-853f-8672795208cc" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="FILE:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to payment-process-apiFlow" doc:id="21f84891-dcdb-43e9-a2cf-f8742eb33126" name="payment-process-apiFlow" />
+		</munit:execution>
+	</munit:test>
+
+
+</mule>

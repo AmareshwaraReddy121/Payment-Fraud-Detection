@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="reportCount" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#fb8f7957-5d39-4e8a-a72f-6afc42ab308c"/>
+  <types:enrichment select="#cf568726-73f3-444b-89f4-9e2d2e1eed21"/>
+  <types:enrichment select="#bf0e4e17-2bb6-4cab-8537-0e4fc67e6006">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="reportCount"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#4e2b5c43-1c71-4bed-8897-22fc98d3fd97"/>
+  <types:enrichment select="#1b91c20e-5972-4bc3-b773-603964fde831"/>
+</types:mule>

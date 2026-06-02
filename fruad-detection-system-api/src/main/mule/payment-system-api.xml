@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<http:listener-config
+		name="payment-system-api-httpListenerConfig">
+		<http:listener-connection host="0.0.0.0"
+			port="8085" />
+	</http:listener-config>
+	<apikit:config name="payment-system-api-config"
+		api="resource::af487c16-6b41-4bfe-8ee6-8cc309b394cd:payment-system-api:1.0.2:raml:zip:payment-system-api.raml"
+		outboundHeadersMapName="outboundHeaders"
+		httpStatusVarName="httpStatus" />
+	<db:config name="Database_Config" doc:name="Database Config"
+		doc:id="9746ac21-15e9-4915-bfcd-0d2abec056d3">
+		<db:my-sql-connection host="127.0.0.1"
+			port="3306" user="root" password="root" database="payment_db" />
+	</db:config>
+	<email:smtp-config name="Email_SMTP"
+		doc:name="Email SMTP" doc:id="fbfe5676-7d71-4de0-9139-4831770b2338">
+		<email:smtp-connection host="smtp.gmail.com"
+			port="587" user="amareshwarareddy44@gmail.com"
+			password="asjivjejaondcxms">
+			<email:properties>
+				<email:property key="mail.smtp.starttls.enable"
+					value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<flow name="payment-system-api-main">
+		<http:listener
+			config-ref="payment-system-api-httpListenerConfig" path="/api/*">
+			<http:response
+				statusCode="#[vars.httpStatus default 200]">
+				<http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+			</http:response>
+			<http:error-response
+				statusCode="#[vars.httpStatus default 500]">
+				<http:body><![CDATA[#[payload]]]></http:body>
+				<http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+			</http:error-response>
+		</http:listener>
+		<apikit:router config-ref="payment-system-api-config" />
+		<error-handler>
+			<on-error-propagate type="APIKIT:BAD_REQUEST">
+				<ee:transform doc:name="Transform Message">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "error": {
+        "code": 400,
+        "errorType": "badRequest",
+        "errorDescription": "You sent a bad request to the API."
+    }
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[400
+						]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate type="APIKIT:NOT_FOUND">
+				<ee:transform doc:name="Transform Message">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 404,
+        errorType: "notFound",
+        errorDescription: "The requested resource was not found."
+ 	}
+ }]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[404
+						]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate
+				type="APIKIT:METHOD_NOT_ALLOWED">
+				<ee:transform doc:name="Transform Message">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 405,
+        errorType: "methodNotAllowed",
+        errorDescription: "The HTTP method used is not allowed for this resource."
+    }
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[405
+						]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+				<ee:transform doc:name="Transform Message">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 406,
+        errorType: "notAcceptable",
+        errorDescription: "The requested media type is not supported by this resource."
+    }
+}
+]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[406
+						]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate
+				type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+				<ee:transform doc:name="Transform Message">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 415,
+        errorType: "unsupportedMediaType",
+        errorDescription: "The request body media type is not supported by this resource."
+    }
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[415
+						]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+				<ee:transform doc:name="Transform Message">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "error": {
+        "code": 501,
+        "errorType": "notImplemented",
+        "errorDescription": "The requested operation is not implemented."
+    }
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[501
+						]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="payment-system-api-console">
+		<http:listener
+			config-ref="payment-system-api-httpListenerConfig" path="/console/*">
+			<http:response
+				statusCode="#[vars.httpStatus default 200]">
+				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
+			</http:response>
+			<http:error-response
+				statusCode="#[vars.httpStatus default 500]">
+				<http:body>#[payload]</http:body>
+				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
+			</http:error-response>
+		</http:listener>
+		<apikit:console config-ref="payment-system-api-config" />
+		<error-handler>
+			<on-error-propagate type="APIKIT:NOT_FOUND">
+				<ee:transform doc:name="Transform Message">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 404,
+        errorType: "notFound",
+        errorDescription: "The requested resource was not found."
+ 	}
+ }]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[404
+						]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="get:\payments:payment-system-api-config">
+		<logger level="INFO" doc:name="Logger"
+			doc:id="87df0b2a-1474-448f-a353-b864486efea3"
+			message="Listing Payments" />
+		<db:select doc:name="Select"
+			doc:id="7f1cf7f5-06f4-42ec-92a7-b34f02d9df3b"
+			config-ref="Database_Config">
+			<db:sql><![CDATA[SELECT 
+    transaction_id  AS transactionId,
+    card_number     AS cardNumber,
+    card_holder     AS cardHolder,
+    amount,
+    currency,
+    country,
+    card_country    AS cardCountry,
+    merchant_id     AS merchantId,
+    email,
+    status,
+    created_at      AS createdAt,
+    reason
+FROM payments 
+WHERE status = "BLOCKED"]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map (row) -> {
+    transactionId: row.transactionId,
+    cardNumber:    row.cardNumber,
+    cardHolder:    row.cardHolder,
+    amount:        row.amount,
+    currency:      row.currency,
+    country:       row.country,
+    cardCountry:   row.cardCountry,
+    merchantId:    row.merchantId,
+    email:         row.email,
+    status:        row.status,
+    reason: row.reason,
+    createdAt:     (row.createdAt default "1970-01-01T00:00:00") as String
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler ref="DB_HANDLING" />
+	</flow>
+	<flow name="post:\notifications\email:application\json"
+		doc:id="4846d3f6-12c4-4dbf-9707-b65dbf183aa4">
+		<logger level="INFO" doc:name="Logger"
+			doc:id="b6705f83-fb95-4420-8a7f-11366e109176"
+			message="Sending fraud alert email" />
+		<ee:transform doc:name="Transform Message"
+			doc:id="df7a219b-c7be-4933-86a2-9b8316be5e3c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="emailSubject"><![CDATA[%dw 2.0
+output application/java
+---
+"Fraud Alert: Transaction " ++ (payload.transactionId default "Unknown")]]></ee:set-variable>
+				<ee:set-variable variableName="emailBody"><![CDATA[%dw 2.0
+output text/plain
+---
+"FRAUD ALERT — Transaction Blocked
+================================
+
+Transaction ID : " ++ (payload.transactionId default "N/A") ++ "
+Card Holder    : " ++ (payload.cardHolder default "Unknown") ++ "
+Amount         : " ++ ((payload.amount default 0) as String) ++ "
+Reason         : " ++ (payload.reason default "Fraud detected") ++ "
+Detected At    : " ++ (now() as String) ++ "
+
+— Automated Fraud Detection System"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger"
+			doc:id="0b926aff-efc7-465b-8310-9b09115098bc" message="#[payload]" />
+		<email:send doc:name="Send fraud alert email"
+			doc:id="ac8b75fd-ff8f-4f0b-80ab-f7e0bdd1c279" config-ref="Email_SMTP"
+			fromAddress="amareshwarareddy44@gmail.com"
+			subject="#[vars.emailSubject]" toAddresses="#[[payload.email]]">
+			<email:body contentType="text/plain" encoding="UTF-8">
+				<email:content><![CDATA[#[vars.emailBody]]]></email:content>
+			</email:body>
+		</email:send>
+		<ee:transform doc:name="Transform Message">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	status: "SUCCESS",
+	message: "Email alert sent successfully",
+	timestamp: now()
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger"
+			doc:id="dd39e2f7-8ae5-41b7-b37b-075926ff7155"
+			message="The Fraud Details send to mail" />
+		<error-handler ref="EMAIL_ERRORS" />
+	</flow>
+	<flow
+		name="post:\payments:application\json:payment-system-api-config">
+		<logger level="INFO" doc:name="Logger"
+			doc:id="f585545b-6b28-44f1-9185-1e1389518e9b"
+			message="Inserting Payment " />
+		<ee:transform doc:name="Transform Message"
+			doc:id="b6b1c74d-fdff-47c7-a0b1-7d3f8880218f">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    transactionId: payload.transactionId,
+    cardNumber:    payload.cardNumber,
+    createdAt :payload.createdAt,
+    cardHolder:    payload.cardHolder,
+    amount:        payload.amount,
+    currency:      payload.currency,
+    country:       payload.country,
+    cardCountry:   payload.cardCountry,
+    merchantId:    payload.merchantId,
+    email:         payload.email,
+    status:        payload.status,
+    reason :payload.reason default "Legacy Record - Reason not recorded"
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger"
+			doc:id="a3a78eda-46c0-4229-aaf2-ce52cd7fba25" message="#[payload]" />
+		<db:insert doc:name="Insert"
+			doc:id="506b6875-fd08-4b6a-9df7-c64a73adbfbf"
+			config-ref="Database_Config">
+			<db:sql><![CDATA[INSERT INTO payments 
+    (transaction_id, card_number, card_holder, amount, currency, 
+     country, card_country, merchant_id, email, status, created_at,reason)
+VALUES 
+    (:transactionId, :cardNumber, :cardHolder, :amount, :currency, 
+     :country, :cardCountry, :merchantId, :email, :status, NOW(),:reason)]]></db:sql>
+			<db:input-parameters><![CDATA[#[payload]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message"
+			doc:id="6f731920-f745-4a54-9ef4-b14fd8ddd714">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    status: "SUCCESS",
+    message: "Payment record created successfully",
+    timestamp: now()
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler ref="DB_HANDLING" />
+	</flow>
+</mule>

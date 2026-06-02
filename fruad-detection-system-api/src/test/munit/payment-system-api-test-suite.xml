@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="payment-system-api-test-suite.xml" />
+	<munit:test name="payment-system-api-test-suite-post:\payments:application\json:payment-system-api-configTest" doc:id="c4978c98-dc88-4d99-9484-e1cb25819b86" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="1cc35cc0-9415-41eb-b7d2-7d70f6be5eed" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Insert" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="506b6875-fd08-4b6a-9df7-c64a73adbfbf" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/json --- { status: "SUCCESS", message: "Payment record created successfully", }]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="94310314-c803-449e-a374-4473b6d6f85e">
+				<munit:payload value='#[output application/json --- { transactionId: "TXN_001", cardNumber: "4567891234567890", cardHolder: "John Doe", amount: 5000, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com", status: "BLOCKED", reason: "Suspicious activity detected" }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\payments:application\json:payment-system-api-config" doc:id="4b23e072-bb66-41db-89cf-be64f9673c1c" name="post:\payments:application\json:payment-system-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="57081727-8bc4-4958-82f6-3945f6ed5175" is='#[MunitTools::equalTo("SUCCESS")]' expression="#[payload.status]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="payment-system-api-test-suite-payment-system-api-mainTest" doc:id="98c79a8b-3d2f-4c80-bf4d-a219d0d589db" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="21b62506-5762-47c8-af26-40ffdb59ca12" processor="apikit:router">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="payment-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value='#[output application/json --- { status: "SUCCESS", message: "Email alert sent successfully"}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="19f31a46-4e9f-45d7-9193-86157a6b1807">
+				<munit:payload value='#[output application/json --- { transactionId: "TXN_001", cardNumber: "4567891234567890", cardHolder: "John Doe", amount: 5000, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com", status: "BLOCKED", reason: "Suspicious activity detected" }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-system-api-main" doc:id="61216a55-1c44-4951-8860-7dcbb84b9c4b" name="payment-system-api-main" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="cda6f18b-5841-4ef5-9f26-ef69a920be36" expression="#[payload.status]" is='#[MunitTools::equalTo("SUCCESS")]' />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="payment-system-api-mainTest:APIKIT:BAD_REQUEST" doc:id="35fa56ba-069c-431b-a387-a9b20852026f" description="Test" expectedErrorType="APIKIT:BAD_REQUEST">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="20865276-1427-4263-95b3-94d07dfe5e66" processor="apikit:router">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="payment-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="67cc41e4-58c2-4d3f-a9da-4ae2d915eacf">
+				<munit:payload value='#[output application/json --- { transactionId: "TXN_001", cardNumber: "4567891234567890", cardHolder: "John Doe", amount: 5000, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com", status: "BLOCKED", reason: "Suspicious activity detected" }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-system-api-main" doc:id="60585fcb-f8e0-4c7e-9fa2-40302817ad3e" name="payment-system-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-mainTest:APIKIT:NOT_FOUND" doc:id="ebb15134-8e37-45f4-83a6-7127f325634b" description="Test" expectedErrorType="APIKIT:NOT_FOUND">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="6c29f8b1-f0ca-4bc4-b519-bc1bb0253f18" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="cc19ff23-48ca-48fd-af9d-d074d3db004c" >
+				<munit:payload value='#[output application/json --- { transactionId: "TXN_001", cardNumber: "4567891234567890", cardHolder: "John Doe", amount: 5000, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com", status: "BLOCKED", reason: "Suspicious activity detected" }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-system-api-main" doc:id="fca5982f-bd14-4696-b78e-2e2258bb3260" name="payment-system-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-mainTest:APIKIT:METHOD_NOT_ALLOWED" doc:id="960c9a25-0047-404d-8026-47b63782d7d9" description="Test" expectedErrorType="APIKIT:METHOD_NOT_ALLOWED">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="1990f647-1d62-4b5d-bdde-90d2a7820e12" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:METHOD_NOT_ALLOWED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="ba1e777c-a643-4284-bfb6-55262be73afc" >
+				<munit:payload value='#[output application/json --- { transactionId: "TXN_001", cardNumber: "4567891234567890", cardHolder: "John Doe", amount: 5000, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com", status: "BLOCKED", reason: "Suspicious activity detected" }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-system-api-main" doc:id="976405b0-bff6-4682-a2ea-bd4483a9065e" name="payment-system-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-mainTest:APIKIT:NOT_ACCEPTABLE" doc:id="07826355-c40e-4677-83e2-ef13718a7c2c" description="Test" expectedErrorType="APIKIT:NOT_ACCEPTABLE">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="21a84f19-f9ac-4688-9c92-3127c77c790f" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_ACCEPTABLE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="18a269e2-3b80-4c9f-b548-a4a12194b053" >
+				<munit:payload value='#[output application/json --- { transactionId: "TXN_001", cardNumber: "4567891234567890", cardHolder: "John Doe", amount: 5000, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com", status: "BLOCKED", reason: "Suspicious activity detected" }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-system-api-main" doc:id="8f419e55-af71-49f3-8cd7-f3524f936f11" name="payment-system-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-mainTest:APIKIT:UNSUPPORTED_MEDIA_TYPE" doc:id="7efad19a-2f5e-4eac-8496-2ef515ab1bfc" description="Test" expectedErrorType="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="61d30a9f-8370-4f63-acb2-3de74dc5f5a6" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:UNSUPPORTED_MEDIA_TYPE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="59335efe-b3f7-42b5-b918-ef74f3af2d02" >
+				<munit:payload value='#[output application/json --- { transactionId: "TXN_001", cardNumber: "4567891234567890", cardHolder: "John Doe", amount: 5000, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com", status: "BLOCKED", reason: "Suspicious activity detected" }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-system-api-main" doc:id="d82465a7-61cd-4810-add8-a36673c78a0a" name="payment-system-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-mainTest:APIKIT:NOT_IMPLEMENTED" doc:id="0314dd18-93ca-40c9-82e8-f2336d39b24a" description="Test" expectedErrorType="APIKIT:NOT_IMPLEMENTED">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="4c74bf4d-a80f-4235-a009-e3c5cdff6282" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_IMPLEMENTED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="b62a96d1-889f-46ed-8e92-63c1c18d6e42" >
+				<munit:payload value='#[output application/json --- { transactionId: "TXN_001", cardNumber: "4567891234567890", cardHolder: "John Doe", amount: 5000, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com", status: "BLOCKED", reason: "Suspicious activity detected" }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-system-api-main" doc:id="5ec5bf4e-ad16-4dcc-a29e-738ee8f1eb6b" name="payment-system-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-test-suite-get:\payments:" doc:id="f691e6bb-e803-49e4-bdab-08004d4e6c69" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="62ac8536-5900-448e-b7dc-db07535ce057" processor="db:select" >
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/json ---&#10;[&#10;  {&#10;    "transactionId": "TXN-20260519-000845",&#10;    "cardNumber": "4532-XXXX-XXXX-7821",&#10;    "cardHolder": "ArunKumar",&#10;    "amount": 14999.50,&#10;    "currency": "INR",&#10;    "country": "IN",&#10;    "cardCountry": "IN",&#10;    "merchantId": "MERCH-IN-00231",&#10;    "email": "example@example.com",&#10;    "status": "BLOCKED",&#10;    "reason": "Amount exceeds daily limit",&#10;    "createdAt": "2026-05-19T14:32:07"&#10;  }&#10;]]' mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\payments:payment-system-api-config" doc:id="d08c0121-9cda-470b-aa77-84d7bd77bc77" name="get:\payments:payment-system-api-config"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="d8403ad4-3e0d-4580-a1d0-015b6f4ff011" expression="#[sizeOf(payload)]" is='#[MunitTools::greaterThan(0)]' />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="payment-system-api-test-suite-get:\payments:DB:CONNECTIVITY" doc:id="a92de375-8282-438f-9411-8a461582b8b0" description="Test" expectedErrorType="DB:CONNECTIVITY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="aac6ce7e-e1c3-4138-a63c-e4117671eb5c" processor="db:select" >
+				<munit-tools:then-return >
+					<munit-tools:error typeId="DB:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\payments:payment-system-api-config" doc:id="c4289171-46d0-4b3b-9c08-df8847d5a340" name="get:\payments:payment-system-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-test-suite-get:\payments:DB:BAD_SQL_SYNTAX" doc:id="e68d9c8a-b189-4120-a65f-d5821372d53e" description="Test" expectedErrorType="DB:BAD_SQL_SYNTAX">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="fa37e93c-1aca-4818-9d0f-bcad54ca41e3" processor="db:select" >
+				<munit-tools:then-return >
+					<munit-tools:error typeId="DB:BAD_SQL_SYNTAX" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\payments:payment-system-api-config" doc:id="edaec180-237f-464d-898b-f0ef8e20cecc" name="get:\payments:payment-system-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-test-suite-get:\payments:DB:QUERY_EXECUTION" doc:id="d00de1dc-5100-4369-89d2-be6436a3eff0" description="Test" expectedErrorType="DB:QUERY_EXECUTION">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="598e6b86-8268-4efe-87c5-ad1a8bf8622c" processor="db:select" >
+				<munit-tools:then-return >
+					<munit-tools:error typeId="DB:QUERY_EXECUTION" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\payments:payment-system-api-config" doc:id="d2f53c91-a259-434f-8739-2d7360be0bfe" name="get:\payments:payment-system-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-test-suite-get:\payments:DB:*" doc:id="81843d5c-c4cf-4738-84e1-95e74d8a187d" description="Test" expectedErrorType="DB:*">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="a86f38f5-3de6-4aaa-9f59-76bcfb1601b9" processor="db:select" >
+				<munit-tools:then-return >
+					<munit-tools:error typeId="DB:*" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\payments:payment-system-api-config" doc:id="95297d07-efa4-4d2e-bcd2-36867c7e7175" name="get:\payments:payment-system-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-consoleTest-APIKIT:NOT_FOUND" doc:id="5516cbd0-8854-453f-bef6-626130fbbb05" description="Test" expectedErrorType="APIKIT:NOT_FOUND">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="e4ec5972-ef7b-490d-9a6f-324e7c0d0eed" processor="apikit:console">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to payment-system-api-console" doc:id="2946c14c-8da5-4c60-a649-def077c7ca17" name="payment-system-api-console"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-test-suite-post:\notifications\email:application\jsonTest" doc:id="819cb82f-7eef-46dd-a6e4-a39c2ca0803c" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="e500c3d4-45fe-4b93-b04a-ec6a26f707ac" processor="email:send">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Send fraud alert email" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="ac8b75fd-ff8f-4f0b-80ab-f7e0bdd1c279" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value='#[%dw 2.0 output application/json --- { status: "SUCCESS", message: "Email alert sent successfully"}]' mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="4e43ba56-3b9c-4af5-84c9-feab461c3898">
+				<munit:payload value='#[output application/json --- { transactionId: "TXN_001", cardNumber: "4567891234567890", cardHolder: "John Doe", amount: 5000, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com", status: "BLOCKED", reason: "Suspicious activity detected" }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\notifications\email:application\json" doc:id="9b63e3df-456c-44b7-8ef7-5b29e53a8c55" name="post:\notifications\email:application\json" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="cc8e76b8-3178-4a13-bc4d-c47b9666a60f" is='#[MunitTools::equalTo("SUCCESS")]' expression="#[payload.status]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="payment-system-api-post:\notifications\email:EMAIL:SEND" doc:id="6c4dac3c-44b0-4956-99c3-e3bca956115c" description="Test" expectedErrorType="EMAIL:SEND">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="1245be0e-cf6a-4978-9407-46f288f79121" processor="email:send">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Send fraud alert email" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="ac8b75fd-ff8f-4f0b-80ab-f7e0bdd1c279" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="EMAIL:SEND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="0a9a1600-2b03-46a8-ac5c-c6a0fa8df117">
+				<munit:payload value='#[output application/json --- { transactionId: "TXN_001", cardNumber: "4567891234567890", cardHolder: "John Doe", amount: 5000, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com", status: "BLOCKED", reason: "Suspicious activity detected" }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\notifications\email:application\json" doc:id="89ddbfa3-62aa-4677-be31-8210d9e69025" name="post:\notifications\email:application\json" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-post:\notifications\email:EMAIL:CONNECTIVITY" doc:id="629e20dc-5cc6-483e-8749-26beaee9f46c" description="Test" expectedErrorType="EMAIL:CONNECTIVITY" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="e09f43aa-d703-4936-8aa4-11a6381e75e4" processor="email:send" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Send fraud alert email" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="ac8b75fd-ff8f-4f0b-80ab-f7e0bdd1c279" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="EMAIL:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="0562fda9-7784-4488-a4f1-da08af9d18b8" >
+				<munit:payload value='#[output application/json --- { transactionId: "TXN_001", cardNumber: "4567891234567890", cardHolder: "John Doe", amount: 5000, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com", status: "BLOCKED", reason: "Suspicious activity detected" }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\notifications\email:application\json" doc:id="24dc0269-3be7-479f-8234-899e4473a076" name="post:\notifications\email:application\json" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-system-api-post:\notifications\email:EMAIL:*" doc:id="6a23794d-758e-4edf-985a-acfd8f4e14aa" description="Test" expectedErrorType="EMAIL:*" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="a73e1e85-7d4c-48cc-87e5-f6818f38d20b" processor="email:send" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Send fraud alert email" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="ac8b75fd-ff8f-4f0b-80ab-f7e0bdd1c279" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="EMAIL:*" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="8385e021-e965-48e0-9a46-6c1f4b181f17" >
+				<munit:payload value='#[output application/json --- { transactionId: "TXN_001", cardNumber: "4567891234567890", cardHolder: "John Doe", amount: 5000, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com", status: "BLOCKED", reason: "Suspicious activity detected" }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\notifications\email:application\json" doc:id="7b5a7997-78d8-4ff4-a9e7-66151fcea581" name="post:\notifications\email:application\json" />
+		</munit:execution>
+	</munit:test>
+
+
+</mule>

@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="payment-experience-api-test-suite.xml" />
+	
+	<munit:test name="payment-experience-api-mainTest" doc:id="01ba9049-a23c-4cc7-b670-38d3e6f63d1f" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="flow ref" doc:id="2113a845-a10e-46d0-aeb5-49682fd492f0" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-experience-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/json --- {status: "ACCEPTED", message: "Payment queued"}]' mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="14af4067-35d9-4a74-8ace-96f157f9cee4" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+				<munit:attributes value='#[output application/java --- { method: "POST", requestUri: "/api/payments", listenerPath: "/api/*" }]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-experience-api-main" doc:id="ababdb96-4a8d-42d8-81ad-bea754d197d0" name="payment-experience-api-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="4049de13-8dea-48c6-bd14-d993ca61d772" is='#[MunitTools::equalTo("ACCEPTED")]' expression="#[payload.status]" />
+		</munit:validation>
+	
+</munit:test>
+
+    <!-- The test -->
+	<munit:test name="payment-experience-api-mainTest-APIKIT:BAD_REQUEST" doc:id="961041d0-9184-4381-9ee8-94d26cd5b5a8" description="Test" expectedErrorType="APIKIT:BAD_REQUEST">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="flow ref" doc:id="996e8adc-267d-47c3-983d-66ac593bd744" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-experience-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="e9d07a27-453e-4090-a730-5e176b5095d9" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+				<munit:attributes value='#[output application/java --- { method: "POST", requestUri: "/api/payments", listenerPath: "/api/*" }]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-experience-api-main" doc:id="00e09e9d-8ecc-4e6b-9ea7-268806a03240" name="payment-experience-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-experience-api-mainTest-APIKIT:NOT_FOUND" doc:id="bcbdceb0-d02c-4789-b407-eafa5da99162" description="Test" expectedErrorType="APIKIT:NOT_FOUND" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="flow ref" doc:id="e06de0d3-f3d7-4dcf-a7af-e8b0d9805353" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-experience-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="34cace18-9e23-4d64-b293-20235c3519b8" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+				<munit:attributes value='#[output application/java --- { method: "POST", requestUri: "/api/payments", listenerPath: "/api/*" }]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-experience-api-main" doc:id="278730ec-3df6-4cfa-8ca8-9990ea8db150" name="payment-experience-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-experience-api-mainTest-APIKIT:METHOD_NOT_ALLOWED" doc:id="2f2cd7e5-95b0-4463-af68-b236356f2b49" description="Test" expectedErrorType="APIKIT:METHOD_NOT_ALLOWED">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="flow ref" doc:id="8de79ef3-b037-4325-bd5f-0735e8086ec0" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-experience-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:METHOD_NOT_ALLOWED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="62657f12-b4c9-46f3-82c4-3edb55c70b3d" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+				<munit:attributes value='#[output application/java --- { method: "POST", requestUri: "/api/payments", listenerPath: "/api/*" }]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-experience-api-main" doc:id="f70bbed5-bf9a-41e9-a8b8-a3de35cf5a17" name="payment-experience-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-experience-api-mainTest-APIKIT:NOT_ACCEPTABLE" doc:id="e04cc751-043a-4802-9849-442cc49d5236" description="Test" expectedErrorType="APIKIT:NOT_ACCEPTABLE">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="flow ref" doc:id="a0c29d49-a9ea-4c94-ba69-2f41d5aa457d" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-experience-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_ACCEPTABLE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="83a01a7b-2b87-4686-8d82-3777a7bd46cf" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+				<munit:attributes value='#[output application/java --- { method: "POST", requestUri: "/api/payments", listenerPath: "/api/*" }]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-experience-api-main" doc:id="cdb442e5-972f-4a6f-8289-9d8f479c70c0" name="payment-experience-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-experience-api-mainTest-APIKIT:UNSUPPORTED_MEDIA_TYPE" doc:id="09f1cbf0-6e0d-4f3a-919c-751fa8173034" description="Test" expectedErrorType="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="flow ref" doc:id="23bbe8da-3651-4798-861d-dc65968ca0d3" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-experience-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:UNSUPPORTED_MEDIA_TYPE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="9518f3d7-5ecd-4a96-a754-1a52e2e8732b" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+				<munit:attributes value='#[output application/java --- { method: "POST", requestUri: "/api/payments", listenerPath: "/api/*" }]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-experience-api-main" doc:id="327def7a-4a5e-4795-b36e-7ce24611fac9" name="payment-experience-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-experience-api-mainTest-APIKIT:NOT_IMPLEMENTED" doc:id="02610a3e-54c2-4d19-92a6-ff749cd60c88" description="Test" expectedErrorType="APIKIT:NOT_IMPLEMENTED">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="flow ref" doc:id="2c26d19d-f1af-414b-a8e5-8ed7cbc40d93" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="payment-experience-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_IMPLEMENTED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="f07b72ab-2b34-4568-a786-caabf9507ddc" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+				<munit:attributes value='#[output application/java --- { method: "POST", requestUri: "/api/payments", listenerPath: "/api/*" }]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to payment-experience-api-main" doc:id="85ecb8dd-8b18-4f98-8d8d-62bdc8608174" name="payment-experience-api-main" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="post:\payments:application\json:payment-experience-api-configTest" doc:id="d55f4764-e15c-4944-a6b9-3b821b2b1f66" description="Valid Payment returns 202">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="64e57169-a031-4790-b865-f2254606730d" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Request to process-api" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3daad24b-4d92-4544-8c02-855e6327b169" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value='#[output application/json --- {status: "ACCEPTED", message: "Payment queued", transactionId: "TEST_001", timestamp: "2026-05-17T10:00:00"}]' mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="469343c4-ab95-459a-95e7-3f9be692c1e8">
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test User", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\payments:application\json:payment-experience-api-config" doc:id="4274013d-0b08-4554-8282-5c289bf5ee78" name="post:\payments:application\json:payment-experience-api-config" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="d51b3569-0b3b-4228-a873-11be393a6c6d" expression="#[payload.status]" is='#[MunitTools::equalTo("ACCEPTED")]' />
+		</munit:validation>
+	
+</munit:test>
+	<munit:test name="post:\payments:application\json:FLOW_1:HTTP:BAD_REQUEST" doc:id="d532f81a-4dea-4388-9750-39bd038a85b7" description="Test" expectedErrorType="HTTP:BAD_REQUEST">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="dab1aa2c-e8fc-4718-b78e-baa6f7157abb" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Request to process-api" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3daad24b-4d92-4544-8c02-855e6327b169" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="HTTP_Request_config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="58b807e6-24dd-4d56-b243-bb58be361af3" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test User", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\payments:application\json:payment-experience-api-config" doc:id="7315dd17-424c-42da-aed6-f159c26152be" name="post:\payments:application\json:payment-experience-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="post:\payments:application\json:FLOW_1:HTTP:UNAUTHORIZED" doc:id="d0fa7217-9b2b-418d-9b7e-72f91c79218a" description="Test" expectedErrorType="HTTP:UNAUTHORIZED">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="8cbb4df6-9c97-4b45-87f3-45a70d7676ee" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Request to process-api" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3daad24b-4d92-4544-8c02-855e6327b169" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="HTTP_Request_config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:UNAUTHORIZED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="02d3141b-7cac-43af-8776-974a0612597d" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test User", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\payments:application\json:payment-experience-api-config" doc:id="71458b6b-149a-4e31-8197-84053ce2a841" name="post:\payments:application\json:payment-experience-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="post:\payments:application\json:FLOW_1:HTTP:NOT_FOUND" doc:id="ce5c6dcd-d429-4638-9778-6b20a7135a2a" description="Test" expectedErrorType="HTTP:NOT_FOUND">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="f586fe1d-c7f9-445c-be5c-bf69839014a0" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Request to process-api" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3daad24b-4d92-4544-8c02-855e6327b169" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="HTTP_Request_config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="e8fbfaea-f8c7-4ea0-b898-d6af40794aaf" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test User", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\payments:application\json:payment-experience-api-config" doc:id="51c57f2d-440b-47b3-914d-91e05e78c36f" name="post:\payments:application\json:payment-experience-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="post:\payments:application\json:FLOW_1:HTTP:METHOD_NOT_ALLOWED" doc:id="3ac4c54c-8108-4aac-9961-fc2bb313c7d2" description="Test" expectedErrorType="HTTP:METHOD_NOT_ALLOWED">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="44561e63-432c-40d0-b233-cef0b938fd1a" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Request to process-api" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3daad24b-4d92-4544-8c02-855e6327b169" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="HTTP_Request_config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:METHOD_NOT_ALLOWED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="c1d41c45-c361-4893-88e6-f59bfe63c383" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test User", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\payments:application\json:payment-experience-api-config" doc:id="e2b9e5b1-9481-422a-bedd-ba3a14753d6d" name="post:\payments:application\json:payment-experience-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="post:\payments:application\json:FLOW_1:HTTP:INTERNAL_SERVER_ERROR" doc:id="46776c37-e2c8-4061-ad76-84f79d7869a8" description="Test" expectedErrorType="HTTP:INTERNAL_SERVER_ERROR">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="988b4f52-52a9-49f1-881b-af5972764398" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Request to process-api" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3daad24b-4d92-4544-8c02-855e6327b169" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="HTTP_Request_config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:INTERNAL_SERVER_ERROR" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="df9ee7df-5563-4e3d-94a8-3078e2c067a9" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test User", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\payments:application\json:payment-experience-api-config" doc:id="c02f583b-a3a4-4e78-b0bf-3f84bfecc41a" name="post:\payments:application\json:payment-experience-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="post:\payments:application\json:FLOW_1:HTTP:SERVICE_UNAVAILABLE" doc:id="18c5aa76-5ebf-4ccb-816a-386a627608be" description="Test" expectedErrorType="HTTP:SERVICE_UNAVAILABLE">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="07e97af6-a65b-421f-9c45-3cbc0a263513" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Request to process-api" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3daad24b-4d92-4544-8c02-855e6327b169" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="HTTP_Request_config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:SERVICE_UNAVAILABLE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="b53c02ec-1914-4185-a059-29244c1a3ea6" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test User", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\payments:application\json:payment-experience-api-config" doc:id="9c85e50b-9985-4628-84fd-13c51a38daea" name="post:\payments:application\json:payment-experience-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="post:\payments:application\json:FLOW_1:HTTP:CONNECTIVITY" doc:id="3e3790d8-c1bb-418c-ba8e-2a64ed55ad34" description="Test" expectedErrorType="HTTP:CONNECTIVITY">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="post:\payments:application\json:payment-experience-api-config" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="ba1b1641-8b5d-40d0-a62f-5efda7913aae" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Request to process-api" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3daad24b-4d92-4544-8c02-855e6327b169" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="1a921dc0-7def-4128-a6b9-6c866c9ebbbb" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test User", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\payments:application\json:payment-experience-api-config" doc:id="2d263143-22c9-45ba-984c-63fad5d96a4a" name="post:\payments:application\json:payment-experience-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="post:\payments:application\json:FLOW_1:HTTP:UNSUPPORTED_MEDIA_TYPE" doc:id="f8a092e9-fce6-495f-adcf-7a0001d28e9d" description="Test" expectedErrorType="HTTP:UNSUPPORTED_MEDIA_TYPE" >
+		
+		<munit:enable-flow-sources>
+			
+			<munit:enable-flow-source value="post:\payments:application\json:payment-experience-api-config" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="25b27999-cd92-46f7-a5e7-aceb8be76d43" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Request to process-api" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3daad24b-4d92-4544-8c02-855e6327b169" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:UNSUPPORTED_MEDIA_TYPE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="c412bece-2d64-450c-8287-2d2ab96608a6" >
+				<munit:payload value='#[output application/json --- {transactionId: "TEST_001", cardNumber: "4567891234567890", cardHolder: "Test User", amount: 2500, currency: "INR", country: "IN", cardCountry: "IN", merchantId: "M001", email: "test@example.com"}]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\payments:application\json:payment-experience-api-config" doc:id="590d073a-7a66-49bc-9c27-3f39de71fd01" name="post:\payments:application\json:payment-experience-api-config" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="payment-experience-api-test-suite-payment-experience-api-console-APIKIT:NOT_FOUND" doc:id="86038506-8e11-4689-91bc-b11207529ca9" description="Test" expectedErrorType="APIKIT:NOT_FOUND">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="73159f11-8675-4176-9a25-29a5fe2da265" processor="apikit:console">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="payment-experience-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<flow-ref doc:name="Flow-ref to payment-experience-api-console" doc:id="8d7006b0-c3af-4d14-936d-1b1279658917" name="payment-experience-api-console" />
+		</munit:execution>
+	</munit:test>
+
+
+</mule>

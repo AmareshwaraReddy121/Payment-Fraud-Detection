@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="ShedulerErrorHandler"
+		doc:id="bb7ddcf7-68fe-4b9b-83f7-b684f9abf2d8">
+	 <!-- 1. System API unreachable -->
+		<on-error-propagate type="HTTP:CONNECTIVITY"
+			doc:name="System API Unavailable" enableNotifications="true"
+			logException="true">
+			<ee:transform doc:name="Transform Message">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 503,
+        errorType: "systemApiUnavailable",
+        errorDescription: "System API is unreachable. The scheduler will retry on the next run."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+
+		<!-- 2. System API returned 500 -->
+		<on-error-propagate
+			type="HTTP:INTERNAL_SERVER_ERROR"
+			doc:name="System API Internal Error" enableNotifications="true"
+			logException="true">
+			<ee:transform doc:name="Transform Message">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 502,
+        errorType: "systemApiInternalError",
+        errorDescription: "The downstream System API returned an internal server error."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+
+		<!-- 3. File system error (CSV write failed) -->
+		<on-error-propagate type="FILE:CONNECTIVITY"
+			doc:name="File System Error" enableNotifications="true"
+			logException="true">
+			<ee:transform doc:name="Transform Message">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 500,
+        errorType: "fileSystemError",
+        errorDescription: "File system error occurred while writing the CSV file."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+
+		<!-- 4. DataWeave expression error -->
+
+		<!-- 5. Catch-all -->
+	</error-handler>
+	<error-handler name="Payment-Process"
+		doc:id="21c2a44f-48ea-4321-a87a-e6cad764eaab">
+
+			<!-- 1. ActiveMQ (JMS broker) is down -->
+		<on-error-propagate type="JMS:CONNECTIVITY"
+			doc:name="JMS Queue Unavailable">
+			<ee:transform doc:name="Build 503 Response">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 503,
+        errorType: "Service Unavailable",
+        errorDescription: "Message queue is temporarily unavailable. Please try again."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus">503</ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+
+		<!-- 2. DataWeave expression error (rare with default values) -->
+		<on-error-propagate type="MULE:EXPRESSION"
+			doc:name="Expression Error">
+			<ee:transform doc:name="Build 500 Response">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 500,
+        errorType: "Internal Server Error",
+        errorDescription: "Unable to process payment data. Please verify input."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus">500</ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+
+		<!-- 3. Catch-all for anything else -->
+		<on-error-propagate type="ANY" doc:name="Catch all">
+			<ee:transform doc:name="Build 500 Response">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    error: {
+        code: 500,
+        errorType: "Internal Server Error",
+        errorDescription: "Something went wrong. Please try again later."
+    }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus">500</ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+	<!-- [STUDIO:"onNewMessageErrors"]<error-handler name="onNewMessageErrors" 
+		doc:id="73bb7a55-1cd5-4f83-8a95-0427731c5ac9"> <!&#45;&#45; 1. System API 
+		is down — log and move on &#45;&#45;> <on-error-continue type="HTTP:CONNECTIVITY" 
+		doc:name="System API Unavailable"> <logger level="ERROR" doc:name="Log connectivity 
+		error" message='#["[WORKER&#93; System API unreachable for transaction: " 
+		++ (payload.transactionId default "unknown") ++ ". Error: " ++ (error.description 
+		default "")&#93;' /> </on-error-continue> <!&#45;&#45; 2. System API returned 
+		an error (400 / 500) — log &#45;&#45;> <on-error-continue type="HTTP:BAD_REQUEST" 
+		doc:name="System API Rejected"> <logger level="ERROR" doc:name="Log bad request" 
+		message='#["[WORKER&#93; System API rejected transaction: " ++ (vars.paymentRecord.transactionId 
+		default "unknown") ++ ". Error: " ++ (error.description default "")&#93;' 
+		/> </on-error-continue> <on-error-continue type="HTTP:INTERNAL_SERVER_ERROR" 
+		doc:name="System API Internal Error"> <logger level="ERROR" doc:name="Log 
+		downstream error" message='#["[WORKER&#93; System API internal error for 
+		transaction: " ++ (vars.paymentRecord.transactionId default "unknown")&#93;' 
+		/> </on-error-continue> <!&#45;&#45; 3. Catch-all — log anything else &#45;&#45;> 
+		<on-error-continue type="ANY" doc:name="Catch all"> <logger level="ERROR" 
+		doc:name="Log unexpected error" message='#["[WORKER&#93; Unexpected error 
+		processing transaction: " ++ (vars.paymentRecord.transactionId default "unknown") 
+		++ ". Error: " ++ (error.errorType.identifier default "UNKNOWN") ++ " - " 
+		++ (error.description default "")&#93;' /> </on-error-continue> </error-handler> 
+		[STUDIO] -->
+</mule>
